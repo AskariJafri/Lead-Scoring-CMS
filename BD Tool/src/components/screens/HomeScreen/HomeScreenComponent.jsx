@@ -9,6 +9,8 @@ import { useStore } from "../../store";
 import ResultsTable from "../../utilityComponents/ResultsTable/ResultsTable";
 import UploadFileModal from "../../utilityComponents/UploadFile/UploadFileModal";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
 const HomeScreenComponent = ({ openModal, setOpenModal }) => {
   const {
     columns,
@@ -72,7 +74,10 @@ const HomeScreenComponent = ({ openModal, setOpenModal }) => {
           redirect: "follow",
         };
 
-        fetch("http://localhost:8000/files/add-file", requestOptions)
+        fetch(
+          `${API_BASE_URL}/files/add-file`,
+          requestOptions
+        )
           .then((response) => response)
           .then((result) => {
             if (result.status == 417) {

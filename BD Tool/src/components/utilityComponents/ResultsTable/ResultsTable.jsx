@@ -14,6 +14,7 @@ const ResultsTable = ({ csvData, columns, loading }) => {
     >
       <CssBaseline />
       <DataGrid
+        // getRowId={(row) => row.id}
         rows={csvData}
         columns={columns}
         checkboxSelection={false}
@@ -29,7 +30,6 @@ const ResultsTable = ({ csvData, columns, loading }) => {
           },
         }}
         sx={{
-          boxShadow: 2,
           borderRadius: 0,
           boxShadow: 0,
           "& .MuiDataGrid-cell:hover": {

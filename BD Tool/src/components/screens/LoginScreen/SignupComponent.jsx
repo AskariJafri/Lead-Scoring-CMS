@@ -3,6 +3,10 @@ import { Box, Grid, Typography, TextField, Button, Paper } from "@mui/material";
 import robot from "../../../assets/idea_robot.png"; // Import your login image here
 import { loginStore } from "../../store";
 import { useNavigate } from "react-router-dom";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+
 const SignUpComponent = () => {
   const [password, setPassword] = React.useState();
   const [name, setName] = React.useState();
@@ -17,19 +21,23 @@ const SignUpComponent = () => {
       alert("Passwords did not match");
     } else {
       try {
-        const response = await fetch("http://localhost:8000/users", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: username,
-            password: password,
-            email: email,
-            full_name: name,
-            disabled: false,
-          }),
-        });
+        const response = await fetch(
+          `${API_BASE_URL}/users`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "ngrok-skip-browser-warning": "69420",
+            },
+            body: JSON.stringify({
+              username: username,
+              password: password,
+              email: email,
+              full_name: name,
+              disabled: false,
+            }),
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Failed to register");
@@ -45,10 +53,9 @@ const SignUpComponent = () => {
     <Grid
       container
       spacing={0}
-      style={{ height: "80vh" }}
+      style={{ height: "102vh" }}
       alignItems={"center"}
       justifyContent={"center"}
-      overflow={"hidden"}
     >
       <Grid item xs={12} md={3}>
         <Box

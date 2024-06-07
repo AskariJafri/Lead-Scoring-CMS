@@ -43,3 +43,11 @@ def preprocess_company_name(name):
         return name.split(",")[0].strip()  
     else:
         return name
+    
+def preprocess_field(value, field_name):
+    if field_name.lower() == "company name":
+        return preprocess_company_name(value)
+    elif field_name.lower() == "contact full name":
+        return preprocess_person_name(value)
+    else:
+        return value

@@ -1,54 +1,95 @@
-// ResultsScreenComponent.jsx
-import React, { useState } from "react";
-import { useStore } from "./../../store";
+import React, { useState, useEffect } from "react";
+import { useStore } from "../../store";
 import ResultsTable from "../../utilityComponents/ResultsTable/ResultsTable";
 import Box from "@mui/material/Box";
-import { Typography, TextField, Button } from "@mui/material";
+import { Typography, Button } from "@mui/material";
 import { Link } from "react-router-dom";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
-const ResultsScreenComponent = () => {
-  const { scores, csvData, setAppBarHeading, loading, setLoading } = useStore();
-  const [scoreColumns, setScoreColumns] = useState([]);
+import CheckIcon from '@mui/icons-material/Check';  
+import CircularProgress from '@mui/material/CircularProgress';
 
-  React.useEffect(() => {
+const SOCKET_URL = import.meta.env.SOCKET_URL;
+
+
+const ResultsScreenComponent = () => {
+  const { scores, csvData, setAppBarHeading, loading, setScores, setLoading } = useStore();
+  const [scoreColumns, setScoreColumns] = useState([]);
+  const [success, setSuccess] = useState(false);
+  const [localLoading, setLocalLoading] = useState(false);
+
+  useEffect(() => {
     setAppBarHeading("Results");
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    const ws = new WebSocket("ws://localhost:8000/ws"); // Ensure this URL is correct
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log("Data received from WebSocket:", data);
+      setScores([ ...data]);
+    };
+
+    ws.onopen = () => {
+      console.log("WebSocket connection opened");
+    };
+
+    ws.onclose = (event) => {
+      console.log("WebSocket connection closed:", event);
+    };
+
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    // return () => {
+    //   ws.close();
+    // };
+  }, [setScores]);
+
+  useEffect(() => {
+    console.log("scores",scores)
+    if (scores.length === csvData.length && csvData.length) {
+      setSuccess(true);
+      setLocalLoading(false);
+    }
+
     if (scores) {
-      const columns = Object.keys(scores?.[0] || []).map((key, val) => ({
+      const columns = Object.keys(scores?.[0] || []).map((key) => ({
         field: key,
         headerName: key,
         width: key === "id" ? 70 : 150,
         headerAlign: "left",
-        cellClassName: (params) => {
-          return params.field.includes("_score") ? "score-column" : "";
-        },
+        cellClassName: (params) => params.field.includes("_score") ? "score-column" : "",
         headerClassName: key.includes("score") ? "score-column-header" : "",
       }));
 
-      // Reorder columns so that id column is the first column
       const idColumnIndex = columns.findIndex((col) => col.field === "id");
       if (idColumnIndex !== -1) {
         const idColumn = columns.splice(idColumnIndex, 1)[0];
         columns.unshift(idColumn);
       }
-
       setScoreColumns(columns);
     }
-  }, [scores]);
-  console.log("first", loading);
-  React.useEffect(() => {}, [scores]);
+  }, [scores, csvData]);
+
   return (
     <Box flexDirection={"column"}>
-      {csvData && (
+      {scores && (
         <ResultsTable
           csvData={scores}
           columns={scoreColumns}
           loading={loading}
         />
       )}
-      <Box display={"flex"} justifyContent={"end"} flexDirection={"row"} mt={2}>
+      <Box display={"flex"} justifyContent={"space-between"} flexDirection={"row"} mt={2}>
+        <Box display={"flex"} flexDirection={"row"} alignItems={"center"} gap={2}>
+          <Typography color={"GrayText"}>
+            Records processed: {scores.length} / {csvData.length}   
+          </Typography>
+          {success ? <CheckIcon /> : csvData.length>0? <CircularProgress size={15} />:<></>}
+        </Box>
+        
         <Button
           variant="contained"
           color="primary"

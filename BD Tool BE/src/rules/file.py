@@ -68,3 +68,4 @@ def add_score(request: Request, file = Body(...)):
     new_file_obj = get_collection_scores(request).insert_one(files)
     created_file = get_collection_scores(request).find_one({"_id":new_file_obj.inserted_id})
     return created_file
+

@@ -66,7 +66,7 @@ function App() {
     }
   }, [isAuthenticated]);
   return (
-    <Box>
+    <div>
       {!isLoginScreen && !isRegisterScreen && (
         <>
           <AppBarComponent
@@ -109,7 +109,7 @@ function App() {
           </Route>
         </Routes>
       </Main>
-    </Box>
+    </div>
   );
 }
 

@@ -17,7 +17,7 @@ export const useStore = create((set) => ({
   setCsvData: (newState) => set({ csvData: newState }),
   setIcpData: (newState) => set({ icpData: newState }),
   setWeights: (newState) => set({ weights: newState }),
-  setScores: (newState) => set({ scores: newState }),
+  setScores: (newScores) => set((state) => ({ scores: newScores.length?[...state.scores, ...newScores].sort((a, b) =>b.total_score  - a.total_score):[] })),
   setAppBarHeading: (newState) => set({ appBarHeading: newState }),
   setSelectedColumns: (newState) => set({ selectedColumns: newState }),
 }));

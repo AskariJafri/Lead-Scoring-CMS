@@ -5,6 +5,9 @@ import { loginStore } from "../../store";
 import { useNavigate } from "react-router-dom";
 import Link from "@mui/material/Link";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+
 const LoginScreenComponent = () => {
   const { username, password, setUsername, setPassword } = loginStore();
   const navigate = useNavigate();
@@ -12,16 +15,19 @@ const LoginScreenComponent = () => {
     event.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:8000/auth/token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: username,
-          password: password,
-        }),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/auth/token`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: username,
+            password: password,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to log in");

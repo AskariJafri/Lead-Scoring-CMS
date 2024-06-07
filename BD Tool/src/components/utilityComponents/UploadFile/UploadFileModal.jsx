@@ -14,6 +14,9 @@ import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { useStore } from "../../store";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+
 const style = {
   position: "absolute",
   top: "50%",
@@ -38,9 +41,18 @@ function UploadFileModal({
     const requestOptions = {
       method: "GET",
       redirect: "follow",
+      headers: new Headers({
+        'Content-Type': 'application/json',
+        // Add CORS headers as needed
+        'Access-Control-Allow-Origin': '*', // Allow requests from any origin (replace '*' with specific origin if needed)
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
+      }),
     };
 
-    fetch("http://localhost:8000/files/get-filenames", requestOptions)
+    fetch(
+      `${API_BASE_URL}/files/get-filenames`,
+      requestOptions
+    )
       .then((response) => response.json())
       .then((result) => {
         if (openUploadFileModal) setDbFiles(result);
@@ -52,6 +64,9 @@ function UploadFileModal({
     const requestOptions = {
       method: "GET",
       redirect: "follow",
+      headers: new Headers({
+        "ngrok-skip-browser-warning": "69420",
+      }),
     };
     const str = encodeURIComponent(value);
     // set filename globally
@@ -59,7 +74,10 @@ function UploadFileModal({
       setFilename(value);
       setOpenModal(false);
       setLoading(true);
-      fetch(`http://localhost:8000/files/${str}`, requestOptions)
+      fetch(
+        `${API_BASE_URL}/files/${str}`,
+        requestOptions
+      )
         .then((response) => response.json())
         .then((result) => setCsvData(result))
         .catch((error) => console.error(error))
