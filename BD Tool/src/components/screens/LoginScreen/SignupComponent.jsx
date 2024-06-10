@@ -27,7 +27,6 @@ const SignUpComponent = () => {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "ngrok-skip-browser-warning": "69420",
             },
             body: JSON.stringify({
               username: username,

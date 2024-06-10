@@ -45,7 +45,7 @@ def create_access_token(data: dict):
 @router.post("/token")
 async def login(request:Request,form_data: dict):
     user_dict = user.find_user_from_username(request,form_data["username"])
-    password = (form_data["password"])
+    password = form_data["password"]
     print(user_dict,password)
     if not password == user_dict["password"]:
         raise HTTPException(status_code=400, detail="Incorrect password")

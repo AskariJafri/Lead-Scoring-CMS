@@ -15,7 +15,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 
 const ScoreResultsScreenComponent = () => {
-  const { setLoading, setScores, columns, icpData,setIcpData, csvData, weights, setWeights, setAppBarHeading, selectedColumns, setSelectedColumns } = useStore();
+  const { setLoading, setScores, columns, icpData, csvData, weights, setWeights, setAppBarHeading, selectedColumns, setSelectedColumns } = useStore();
   const [processedMessages, setProcessedMessages] = useState([]);
 
   useEffect(() => {
@@ -38,15 +38,12 @@ const ScoreResultsScreenComponent = () => {
   };
 
   const handleScoreButtonClick = async () => {
-    // const updatedIcp = { ...columns };
+    const updatedIcp = { ...columns };
     selectedColumns.forEach((selectedColumn) => {
       const column = columns.find((col) => col.field === selectedColumn);
       if (column) {
         const inputValue = document.getElementById(`${column.field}_input`).value;
-        setIcpData(prevData => ({
-          ...prevData,
-          [column.field]: inputValue
-        }));
+        updatedIcp[column.field] = inputValue;
       }
     });
 

@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import CheckIcon from '@mui/icons-material/Check';  
 import CircularProgress from '@mui/material/CircularProgress';
+import { getUsername } from "../../hooks/authHook";
 
 const SOCKET_URL = import.meta.env.SOCKET_URL;
 
@@ -22,7 +23,8 @@ const ResultsScreenComponent = () => {
   }, []);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8000/ws"); // Ensure this URL is correct
+    const username = getUsername()
+    const ws = new WebSocket(`ws://localhost:8000/ws/${username}`); // Ensure this URL is correct
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);

@@ -2,13 +2,18 @@ from fastapi import FastAPI, HTTPException
 from typing import Annotated
 from fastapi import Depends, FastAPI, HTTPException, status,WebSocket,WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordBearer
 from fastapi.security import  OAuth2PasswordRequestForm
+from starlette.middleware.trustedhost import TrustedHostMiddleware
+from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
+# from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
 import uvicorn
 import itertools
 import pika
 import json
 from typing import List
 import aio_pika
+from jose import  jwt
 
 # from AuthFunctions.functions import User, get_current_active_user
 from PreprocessingFunctions.functions import map_company_size
@@ -19,7 +24,7 @@ from routes.api import router as api_router
 config = dotenv_values(".env")
 
 app = FastAPI()
-websocket_connections: List[WebSocket] = []
+websocket_connections: dict = {}
 
 app.add_middleware(
     CORSMiddleware,
@@ -29,22 +34,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*"])
+# app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
+
 rabbitmq_host = config.get("RABBITMQ_HOST", "localhost")
 atlas_host = config.get("ATLAS_URI","localhost")
 
+algorithm=config["ALGORITHM"]
+secret_key=config["SECRET_KEY"]
 
-# rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters(rabbitmq_host))
-# task_queue_channel = rabbitmq_connection.channel()
-# task_queue_channel.queue_declare(queue="tasks")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-# processed_queue_channel = rabbitmq_connection.channel()
-# processed_queue_channel.queue_declare(queue="processed_tasks")
 
-# def check_all_tasks_processed():
-#     """Check if both task and processed_task queues are empty."""
-#     task_count = task_queue_channel.queue_declare(queue="tasks").method.message_count
-#     processed_count = processed_queue_channel.queue_declare(queue="processed_tasks").method.message_count
-#     return task_count == 0 and processed_count == 0
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    try:
+        # Decode and verify the JWT token
+        payload = jwt.decode(token, secret_key, algorithms=[algorithm])
+        # Extract user information from the payload if needed
+        # user_id = payload.get("sub")
+        # username = payload.get("username")
+        # You can return user information if required
+        return payload
+    except jwt.JWTError:
+        # If token verification fails, raise an HTTPException
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 # Function to notify all websocket clients
@@ -61,13 +78,6 @@ def start():
 @app.on_event("shutdown")
 def end():
     app.mongodb_client.close()
-
-# @app.get("/users/me")
-# async def read_users_me(
-#     current_user: Annotated[User, Depends(get_current_active_user)],
-# ):
-#     return current_user
-
 
 @app.post("/score-leads")
 async def score_leads_endpoint(payload: dict):
@@ -96,39 +106,34 @@ async def score_leads_endpoint(payload: dict):
 async def connect_to_rabbitmq():
     return await aio_pika.connect_robust("amqp://guest:guest@rabbitmq/")
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
+@app.websocket("/ws/{user_id}")
+async def websocket_endpoint(websocket: WebSocket, user_id: str):
     await websocket.accept()
-    websocket_connections.append(websocket)
-    print("WebSocket connection accepted")
-
-    connection = await connect_to_rabbitmq()
-    channel = await connection.channel()
-    queue = await channel.declare_queue("tasks")
-
+    if user_id not in websocket_connections:
+        websocket_connections[user_id] = websocket
+    print(f"WebSocket connection accepted for user_id: {user_id}")
     try:
-        print("Rabbit mq consumer connected")
+        connection = await connect_to_rabbitmq()
+        channel = await connection.channel()
+        queue = await channel.declare_queue(f"tasks")
 
         async with queue.iterator() as queue_iter:
             async for message in queue_iter:
                 async with message.process():
                     data = json.loads(message.body)
-                    print(f"Sending data to WebSocket: {data}")
-                    processed_data = score_leads(data)
-                    await websocket.send_json(processed_data)
-
+                    scored_data = score_leads(data)
+                    print(f"Sending data to WebSocket for user_id {user_id}: {scored_data}")
+                    await websocket.send_json(scored_data)
     except WebSocketDisconnect:
-        print("WebSocket disconnected")
+        print(f"WebSocket disconnected for user_id: {user_id}")
+        del websocket_connections[user_id]
     except Exception as e:
         print(f"WebSocket connection error: {e}")
-    finally:
-        websocket_connections.remove(websocket)
-        await connection.close()
 
 
 
 
 app.include_router(api_router)
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000,ws_ping_interval=None)
+    uvicorn.run(app, host="0.0.0.0", port=8000, ws_ping_interval=None, proxy_headers=True, forwarded_allow_ips="*")
     
