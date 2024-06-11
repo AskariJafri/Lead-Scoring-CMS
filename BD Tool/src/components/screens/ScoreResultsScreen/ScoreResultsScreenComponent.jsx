@@ -15,11 +15,12 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 
 const ScoreResultsScreenComponent = () => {
-  const { setLoading, setScores, columns, icpData, csvData, weights, setWeights, setAppBarHeading, selectedColumns, setSelectedColumns } = useStore();
+  const { setLoading, setScores, columns,setIcpData, icpData, csvData, weights, setWeights, setAppBarHeading, selectedColumns, setSelectedColumns } = useStore();
   const [processedMessages, setProcessedMessages] = useState([]);
 
   useEffect(() => {
     setAppBarHeading("Scoring");
+    setWeights({})
   }, []);
 
   const handleCheckboxChange = (event) => {
@@ -38,7 +39,7 @@ const ScoreResultsScreenComponent = () => {
   };
 
   const handleScoreButtonClick = async () => {
-    const updatedIcp = { ...columns };
+    const updatedIcp = {};
     selectedColumns.forEach((selectedColumn) => {
       const column = columns.find((col) => col.field === selectedColumn);
       if (column) {

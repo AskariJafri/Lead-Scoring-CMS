@@ -24,7 +24,7 @@ const ResultsScreenComponent = () => {
 
   useEffect(() => {
     const username = getUsername()
-    const ws = new WebSocket(`ws://localhost:8000/ws/${username}`); // Ensure this URL is correct
+    const ws = new WebSocket(`ws://localhost:8000/ws/${username}`); 
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -44,9 +44,6 @@ const ResultsScreenComponent = () => {
       console.error("WebSocket error:", error);
     };
 
-    // return () => {
-    //   ws.close();
-    // };
   }, [setScores]);
 
   useEffect(() => {
