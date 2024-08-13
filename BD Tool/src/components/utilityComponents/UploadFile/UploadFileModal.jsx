@@ -13,6 +13,7 @@ import robot from "../../../assets/robot.png";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { useStore } from "../../store";
+import { apiRequest } from "../../../api/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -38,50 +39,31 @@ function UploadFileModal({
   const { setCsvData, setFilename, setLoading } = useStore();
 
   React.useEffect(() => {
-    const requestOptions = {
-      method: "GET",
-      redirect: "follow",
-      headers: new Headers({
-        'Content-Type': 'application/json',
-        // Add CORS headers as needed
-        'Access-Control-Allow-Origin': '*', // Allow requests from any origin (replace '*' with specific origin if needed)
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
-      }),
-    };
-
-    fetch(
-      `${API_BASE_URL}/files/get-filenames`,
-      requestOptions
-    )
-      .then((response) => response.json())
-      .then((result) => {
-        if (openUploadFileModal) setDbFiles(result);
-      })
-      .catch((error) => console.error(error));
+    getFileNames()
   }, []);
 
-  const handleDbData = (e, value) => {
-    const requestOptions = {
-      method: "GET",
-      redirect: "follow",
-      headers: new Headers({
-        "ngrok-skip-browser-warning": "69420",
-      }),
-    };
+  const getFileNames = async()=>{
+    const result = await apiRequest('GET', `${API_BASE_URL}/files/get-filenames`)
+    console.log(result)
+    setDbFiles(result)
+  }
+  const handleDbData = async(e, value) => {
     const str = encodeURIComponent(value);
-    // set filename globally
+
     if (str) {
-      setFilename(value);
-      setOpenModal(false);
-      setLoading(true);
-      fetch(
-        `${API_BASE_URL}/files/${str}`,
-        requestOptions
-      )
-        .then((response) => response.json())
-        .then((result) => setCsvData(result))
-        .catch((error) => console.error(error))
-        .finally(() => setLoading(false));
+      try {
+        const result = await apiRequest('GET',  `${API_BASE_URL}/files/${str}`)
+        setFilename(value);
+        setOpenModal(false);
+        setLoading(true);
+        setCsvData(result)
+      }
+      catch(error){
+        console.log(error)
+      }
+      finally{
+        setLoading(false)
+      }
     }
   };
   return (
@@ -136,8 +118,6 @@ function UploadFileModal({
                 color="primary"
                 endIcon={<AddCircleOutlineIcon />}
                 component="label"
-                // component={Link}
-                // to="/generate-icp"
               >
                 Upload
                 <input

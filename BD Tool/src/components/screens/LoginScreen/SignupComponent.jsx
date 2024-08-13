@@ -3,6 +3,7 @@ import { Box, Grid, Typography, TextField, Button, Paper } from "@mui/material";
 import robot from "../../../assets/idea_robot.png"; // Import your login image here
 import { loginStore } from "../../store";
 import { useNavigate } from "react-router-dom";
+import { apiRequest } from "../../../api/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -21,26 +22,13 @@ const SignUpComponent = () => {
       alert("Passwords did not match");
     } else {
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/users`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              username: username,
-              password: password,
-              email: email,
-              full_name: name,
-              disabled: false,
-            }),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to register");
-        }
+        await apiRequest("POST",`${API_BASE_URL}/users`,{
+                username: username,
+                password: password,
+                email: email,
+                full_name: name,
+                disabled: false,
+              })
         navigate("/login");
       } catch (error) {
         console.error("Sign Up error:", error.message);

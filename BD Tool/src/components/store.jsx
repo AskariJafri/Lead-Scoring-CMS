@@ -29,4 +29,13 @@ export const loginStore = create((set) => ({
   setPassword: (newState) => set({ password: newState }),
 }));
 
+export const notificationStore = create((set) => ({
+  open: false,
+  type: 'info', // default type
+  message: '',
+  title: '',
+  setOpen: (open) => set({ open }),
+  setNotification: (type, title, message) => set({ open: true, type, title, message }),
+}));
+
 

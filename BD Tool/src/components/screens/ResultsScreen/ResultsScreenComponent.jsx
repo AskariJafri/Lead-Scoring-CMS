@@ -9,22 +9,20 @@ import CheckIcon from '@mui/icons-material/Check';
 import CircularProgress from '@mui/material/CircularProgress';
 import { getUsername } from "../../hooks/authHook";
 
-const SOCKET_URL = import.meta.env.SOCKET_URL;
+const SOCKET_URL = import.meta.env.SOCKET_URL || "ws://localhost:8000";
 
 
 const ResultsScreenComponent = () => {
-  const { scores, csvData, setAppBarHeading, loading, setScores, setLoading } = useStore();
+  const { scores, csvData, setAppBarHeading, loading, setScores } = useStore();
   const [scoreColumns, setScoreColumns] = useState([]);
   const [success, setSuccess] = useState(false);
-  const [localLoading, setLocalLoading] = useState(false);
-
   useEffect(() => {
     setAppBarHeading("Results");
   }, []);
 
   useEffect(() => {
     const username = getUsername()
-    const ws = new WebSocket(`ws://localhost:8000/ws/${username}`); 
+    const ws = new WebSocket(`${SOCKET_URL}/ws/${username}`); 
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -50,7 +48,6 @@ const ResultsScreenComponent = () => {
     console.log("scores",scores)
     if (scores.length === csvData.length && csvData.length) {
       setSuccess(true);
-      setLocalLoading(false);
     }
 
     if (scores) {

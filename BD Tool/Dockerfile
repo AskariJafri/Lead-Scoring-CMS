@@ -1,14 +1,15 @@
 # Stage 1: Build
-FROM node:20.14.0 AS builder
+FROM node:20.16.0 AS builder
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
+COPY package*.json yarn.lock ./
+RUN npm install -g yarn --force
+RUN yarn install
 COPY . .
-RUN npm run build
-
+RUN yarn build
 # Stage 2: Serve
-FROM node:20.14.0
+FROM node:20.16.0   
 WORKDIR /app
-COPY --from=builder /app .
+COPY --from=builder /app ./
+RUN apt-get update && apt-get install -y iputils-ping  # Install ping
 EXPOSE 5173
-CMD ["npm", "run", "dev"]
+CMD ["yarn", "dev"]

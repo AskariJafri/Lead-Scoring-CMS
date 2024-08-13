@@ -7,5 +7,8 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173, // Ensure this matches your current port
+    watch: {
+      usePolling: true, // Polling is used to ensure changes are detected in Docker
+    },
   },
 });

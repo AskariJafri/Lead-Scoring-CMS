@@ -10,6 +10,7 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import robot from "../../../../src/assets/phone_robot.png";
 import { getToken } from "../../hooks/authHook";
+import { apiRequest } from "../../../api/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -51,26 +52,11 @@ const ScoreResultsScreenComponent = () => {
     try {
       setScores([])
       setLoading(true);
-      const token = getToken(); 
-      const response = await fetch(
-        `${API_BASE_URL}/score-leads`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, 
-          },
-          body: JSON.stringify({
-            data_json: csvData,
-            icp_json: updatedIcp,
-            scoring_weights: weights,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch");
-      }
+      await apiRequest('POST', `${API_BASE_URL}/score-leads`,{
+        data_json: csvData,
+        icp_json: updatedIcp,
+        scoring_weights: weights,
+      })
 
     } catch (error) {
       console.error("Error:", error);

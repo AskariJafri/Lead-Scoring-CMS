@@ -1,46 +1,39 @@
-import React from "react";
-import { Box, Grid, Typography, TextField, Button, Paper } from "@mui/material";
-import robot from "../../../assets/hello_robot.png"; // Import your login image here
-import { loginStore } from "../../store";
-import { useNavigate } from "react-router-dom";
-import Link from "@mui/material/Link";
+import React from 'react';
+import { Box, Grid, Typography, TextField, Button, Paper, Link } from '@mui/material';
+import robot from '../../../assets/hello_robot.png'; // Import your login image here
+import { loginStore } from '../../store';
+import { notificationStore } from '../../store';
+import { useNavigate } from 'react-router-dom';
+import { apiRequest } from '../../../api/api';
+import Notification from '../../utilityComponents/Notification';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-
 const LoginScreenComponent = () => {
   const { username, password, setUsername, setPassword } = loginStore();
+  const { setNotification, setOpen } = notificationStore(); // Destructure setNotification from notification store
   const navigate = useNavigate();
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/auth/token`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: username,
-            password: password,
-          }),
-        }
-      );
+      const data = await apiRequest("POST", `${API_BASE_URL}/auth/token`, {
+        username: username,
+        password: password,
+      });
 
-      if (!response.ok) {
-        throw new Error("Failed to log in");
-      }
-
-      const data = await response.json();
       const token = data.access_token;
-
+      const user_id = data.user_id;
       localStorage.setItem("token", token);
       localStorage.setItem("username", username);
+      localStorage.setItem("userId", user_id);
+      setNotification('success', 'Login Successful', 'You have successfully logged in.');
+      setOpen(true)
       navigate("/");
     } catch (error) {
       console.error("Login error:", error.message);
+      setNotification('error', 'Login Failed', error.message);
     }
   };
 

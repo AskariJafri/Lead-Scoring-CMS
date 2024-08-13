@@ -5,6 +5,9 @@ WORKDIR /app
 
 COPY ./requirements.txt /app/requirements.txt
 
+# Install ping
+RUN apt-get update && apt-get install -y iputils-ping
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app

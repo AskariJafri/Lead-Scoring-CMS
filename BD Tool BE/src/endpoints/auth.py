@@ -47,7 +47,8 @@ async def login(request:Request,form_data: dict):
     user_dict = user.find_user_from_username(request,form_data["username"])
     password = form_data["password"]
     print(user_dict,password)
+    user_id = str(user_dict["_id"])
     if not password == user_dict["password"]:
         raise HTTPException(status_code=400, detail="Incorrect password")
 
-    return {"access_token": create_access_token(user_dict), "token_type": "bearer"}
+    return {"access_token": create_access_token(user_dict), "token_type": "bearer","user_id": user_id}

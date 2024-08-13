@@ -13,6 +13,7 @@ import SignUpComponent from "./components/screens/LoginScreen/SignupComponent";
 import { useAuth } from "./components/hooks/authHook";
 import { destroyToken } from "./components/hooks/authHook";
 import { useStore } from "./components/store";
+import Notification from "./components/utilityComponents/Notification";
 
 const drawerWidth = 240;
 
@@ -67,6 +68,7 @@ function App() {
   }, [isAuthenticated]);
   return (
     <div>
+      <Notification />
       {!isLoginScreen && !isRegisterScreen && (
         <>
           <AppBarComponent

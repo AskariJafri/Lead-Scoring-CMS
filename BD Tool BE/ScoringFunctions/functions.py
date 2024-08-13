@@ -137,10 +137,3 @@ def score_leads(payload):
         print(f"General error: {e}")
         return []
 
-# Example usage (replace with your actual data and scoring weights)
-# data_json = [{"Company Name": "Company A", "Contact Full Name": "John Doe"}, {"Company Name": "Company B", "Contact Full Name": "Jane Smith"}]
-# icp_json = {"Company Name": "Ideal Company", "Contact Full Name": "Ideal Contact"}
-# scoring_weights = {"Company Name": 0.5, "Contact Full Name": 0.5}
-
-# result = score_leads(data_json, icp_json, scoring_weights)
-# print(result)

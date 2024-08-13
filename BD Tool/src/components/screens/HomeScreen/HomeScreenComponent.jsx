@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { useStore } from "../../store";
 import ResultsTable from "../../utilityComponents/ResultsTable/ResultsTable";
 import UploadFileModal from "../../utilityComponents/UploadFile/UploadFileModal";
+import { apiRequest } from "../../../api/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -52,6 +53,7 @@ const HomeScreenComponent = ({ openModal, setOpenModal }) => {
     const file = event.target.files[0];
     const filename = file.name.split(".")[0];
     const fileType = file.name.split(".").pop().toLowerCase();
+    const user_id = localStorage.getItem("userId")
     if (fileType !== "csv") {
       alert("Please upload a CSV file.");
       return;
@@ -59,34 +61,11 @@ const HomeScreenComponent = ({ openModal, setOpenModal }) => {
     Papa.parse(file, {
       complete: (result) => {
         setCsvData(result.data);
-        const myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
-
-        const raw = JSON.stringify({
-          filename: filename,
-          data: result.data,
-        });
-
-        const requestOptions = {
-          method: "POST",
-          headers: myHeaders,
-          body: raw,
-          redirect: "follow",
-        };
-
-        fetch(
-          `${API_BASE_URL}/files/add-file`,
-          requestOptions
-        )
-          .then((response) => response)
-          .then((result) => {
-            if (result.status == 417) {
-              alert("A file with this name already exists!");
-            } else {
-              console.log("File added to the database");
-            }
+        apiRequest("POST",`${API_BASE_URL}/files/add-file`,{
+            filename: filename,
+            data: result.data,
+            added_by: user_id
           })
-          .catch((error) => alert(error));
       },
       header: true,
     });
@@ -95,7 +74,7 @@ const HomeScreenComponent = ({ openModal, setOpenModal }) => {
 
   return (
     <>
-      {csvData && (
+      {!csvData.length ? "Upload Box will be shown" : (
         <ResultsTable csvData={csvData} columns={columns} loading={loading} />
       )}
       <Box display={"flex"} justifyContent={"end"} my={2}>
