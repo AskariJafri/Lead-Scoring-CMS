@@ -4,6 +4,8 @@ import robot from "../../../assets/idea_robot.png"; // Import your login image h
 import { loginStore } from "../../store";
 import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../../../api/api";
+import { Link } from "react-router-dom";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -22,13 +24,13 @@ const SignUpComponent = () => {
       alert("Passwords did not match");
     } else {
       try {
-        await apiRequest("POST",`${API_BASE_URL}/users`,{
-                username: username,
-                password: password,
-                email: email,
-                full_name: name,
-                disabled: false,
-              })
+        await apiRequest("POST", `${API_BASE_URL}/users`, {
+          username: username,
+          password: password,
+          email: email,
+          full_name: name,
+          disabled: false,
+        })
         navigate("/login");
       } catch (error) {
         console.error("Sign Up error:", error.message);
@@ -115,6 +117,17 @@ const SignUpComponent = () => {
               style={{ marginTop: 16 }}
             >
               Register
+            </Button>
+            <Button
+              variant="submit"
+              color="primary"
+              startIcon={<ArrowBackIosNewIcon />}
+              component={Link}
+              to="/login"
+              fullWidth
+              style={{ marginTop: 16 }}
+            >
+              Back to login
             </Button>
           </form>
         </Box>

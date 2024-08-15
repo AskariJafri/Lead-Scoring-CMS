@@ -20,6 +20,8 @@ api.interceptors.request.use(
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
+    // Remove the 'Expect' header if it exists
+    delete config.headers['Expect'];
     return config;
   },
   error => {

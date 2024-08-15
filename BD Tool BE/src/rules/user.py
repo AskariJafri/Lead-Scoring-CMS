@@ -1,6 +1,6 @@
 from fastapi import Body, Request, HTTPException, status
 from fastapi.encoders import jsonable_encoder
-from src.models.user import User 
+from src.models.user import User ,UserCreate
 from bson import ObjectId
 from passlib.context import CryptContext
 from src import utils
@@ -9,7 +9,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def get_collection_users(request:Request):
     return request.app.database["Users"]
 
-def create_user(request: Request, user:User = Body(...)):
+def create_user(request: Request, user:UserCreate = Body(...)):
     user = jsonable_encoder(user)
     # print(user)
     # hashed_password = utils.hashPassword(user["password"])

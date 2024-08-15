@@ -1,12 +1,12 @@
 from fastapi import APIRouter,Body, Request, status
 from typing import List
-from src.models.user import User
+from src.models.user import User,UserCreate
 import src.rules.user as users
 
 router = APIRouter(prefix="/users",tags=["Users"])
 
 @router.post("/", response_description='Create a new user', status_code=status.HTTP_201_CREATED, response_model=User)
-def create_user(request:Request, user:User=Body(...)):
+def create_user(request:Request, user:UserCreate=Body(...)):
     return users.create_user(request,user)
 
 @router.get("/", response_description='List users', status_code=status.HTTP_201_CREATED, response_model=List[User])

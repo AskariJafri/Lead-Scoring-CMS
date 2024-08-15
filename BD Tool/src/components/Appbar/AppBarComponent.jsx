@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { styled, useTheme } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import MuiAppBar from "@mui/material/AppBar";
@@ -7,19 +7,15 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
-import { useStore } from "../store";
-import Divider from "@mui/material/Divider";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
+import Avatar from "@mui/material/Avatar";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import Avatar from "@mui/material/Avatar";
 import ListItemIcon from "@mui/material/ListItemIcon";
-import Tooltip from "@mui/material/Tooltip";
-import PersonAdd from "@mui/icons-material/PersonAdd";
-import Settings from "@mui/icons-material/Settings";
+import Divider from "@mui/material/Divider";
 import Logout from "@mui/icons-material/Logout";
 import { useNavigate } from "react-router-dom";
+import { useStore } from "../store";
 import { getUsername, destroyToken } from "../hooks/authHook";
 
 const drawerWidth = 240;
@@ -135,32 +131,16 @@ export default function AppBarComponent({
             </Typography>
           </Box>
           <Box display={"flex"} justifyContent={"space-between"} gap={2}>
-            <Button
-              endIcon={
-                appBarHeading == "Dashboard" ? (
-                  <UploadFileIcon />
-                ) : appBarHeading == "Dashboard" ? (
-                  <CloudDownloadIcon />
-                ) : null
-              }
-              color="inherit"
-              onClick={() => {
-                {
-                  appBarHeading == "Dashboard"
-                    ? setOpenModal(true)
-                    : appBarHeading == "Results"
-                    ? downloadCSV()
-                    : null;
-                }
-              }}
-              disableElevation={true}
-            >
-              {appBarHeading == "Dashboard"
-                ? "Upload CSV"
-                : appBarHeading == "Results"
-                ? "Download CSV"
-                : ""}
-            </Button>
+            {appBarHeading === "Results" && (
+              <Button
+                endIcon={<CloudDownloadIcon />}
+                color="inherit"
+                onClick={downloadCSV}
+                disableElevation={true}
+              >
+                Download CSV
+              </Button>
+            )}
             <IconButton
               onClick={handleClick}
               size="small"
@@ -210,25 +190,6 @@ export default function AppBarComponent({
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
-        {/* <MenuItem onClick={handleClose}>
-          <Avatar /> Profile
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Avatar /> My account
-        </MenuItem>
-        <Divider />
-        <MenuItem onClick={handleClose}>
-          <ListItemIcon>
-            <PersonAdd fontSize="small" />
-          </ListItemIcon>
-          Add another account
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <ListItemIcon>
-            <Settings fontSize="small" />
-          </ListItemIcon>
-          Settings
-        </MenuItem> */}
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>
             <Logout fontSize="small" />

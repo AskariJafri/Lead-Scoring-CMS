@@ -5,7 +5,7 @@ import react from "@vitejs/plugin-react-swc";
 export default defineConfig({
   plugins: [react()],
   server: {
-    host: true,
+    host: '0.0.0.0',
     port: 5173, // Ensure this matches your current port
     watch: {
       usePolling: true, // Polling is used to ensure changes are detected in Docker
