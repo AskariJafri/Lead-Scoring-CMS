@@ -104,11 +104,15 @@ async def score_leads_endpoint(payload: dict):
     
 async def connect_to_rabbitmq():
     return await aio_pika.connect_robust("amqp://guest:guest@rabbitmq/")
+
+
 @app.websocket("/ws/{user_id}")
 async def websocket_endpoint(websocket: WebSocket, user_id: str):
     await websocket.accept()
-    websocket_connections[user_id] = websocket
     print(f"WebSocket connection accepted for user_id: {user_id}")
+    
+    # Safely add the connection to the dictionary
+    websocket_connections[user_id] = websocket
     
     try:
         connection = await connect_to_rabbitmq()
@@ -127,9 +131,8 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
     except Exception as e:
         print(f"WebSocket connection error: {e}")
     finally:
-        # Remove the websocket from the dictionary safely
-        if user_id in websocket_connections:
-            del websocket_connections[user_id]
+        # Safely remove the websocket connection if it exists
+        websocket_connections.pop(user_id, None)
 
 
 
