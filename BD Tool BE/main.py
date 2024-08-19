@@ -81,13 +81,12 @@ def end():
 
 @app.post("/score-leads")
 async def score_leads_endpoint(payload: dict):
-    all_data=[]
     try:
         data_json = payload["data_json"]
         icp_json = payload["icp_json"]
         scoring_weights = payload["scoring_weights"]
         print("calling scoring")
-        batch_size = 50
+        batch_size = 100
         for i in range(0, len(data_json), batch_size):
             batch = data_json[i:i + batch_size]
             payload = {
@@ -105,13 +104,12 @@ async def score_leads_endpoint(payload: dict):
     
 async def connect_to_rabbitmq():
     return await aio_pika.connect_robust("amqp://guest:guest@rabbitmq/")
-
 @app.websocket("/ws/{user_id}")
 async def websocket_endpoint(websocket: WebSocket, user_id: str):
     await websocket.accept()
-    if user_id not in websocket_connections:
-        websocket_connections[user_id] = websocket
+    websocket_connections[user_id] = websocket
     print(f"WebSocket connection accepted for user_id: {user_id}")
+    
     try:
         connection = await connect_to_rabbitmq()
         channel = await connection.channel()
@@ -126,9 +124,13 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
                     await websocket.send_json(scored_data)
     except WebSocketDisconnect:
         print(f"WebSocket disconnected for user_id: {user_id}")
-        del websocket_connections[user_id]
     except Exception as e:
         print(f"WebSocket connection error: {e}")
+    finally:
+        # Remove the websocket from the dictionary safely
+        if user_id in websocket_connections:
+            del websocket_connections[user_id]
+
 
 
 
